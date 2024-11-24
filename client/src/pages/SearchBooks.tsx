@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import type { FormEvent } from 'react';
 import {
   Container,
@@ -17,16 +17,12 @@ import { SAVE_BOOK } from '../utils/mutations';
 import { searchGoogleBooks } from '../utils/API';
 
 const SearchBooks = () => {
-  // create state for holding returned google api data
   const [searchedBooks, setSearchedBooks] = useState<Book[]>([]);
-  // create state for holding our search field data
   const [searchInput, setSearchInput] = useState('');
-  // mutation for savebook
   const [saveBook] = useMutation(SAVE_BOOK);
-  // defin savedbookids for JSX
   const [savedBookIds, setSavedBookIds] = useState<string[]>([]);
+  const [, setErrorMessage] = useState<string | null>(null);
 
-  // create method to search for books and set state on form submit
   const handleFormSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!searchInput) {
@@ -43,8 +39,8 @@ const SearchBooks = () => {
 
       const bookData = items.map((book: GoogleAPIBook) => ({
         bookId: book.id,
-        authors: book.volumeInfo.authors || ['No author to display'],
         title: book.volumeInfo.title,
+        authors: book.volumeInfo.authors || ['No author to display'],
         description: book.volumeInfo.description,
         image: book.volumeInfo.imageLinks?.thumbnail || '',
         link: book.volumeInfo.infoLink || '',
@@ -54,24 +50,48 @@ const SearchBooks = () => {
       setSearchInput('');
     } catch (err) {
       console.error(err);
+      setErrorMessage('Failed to fetch books. Please try again later.');
     }
   };
 
-
-
-  // create function to handle saving a book to our database
   const handleSaveBook = async (bookId: string) => {
-    // find the book in `searchedBooks` state by the matching id
-    const bookToSave: Book = searchedBooks.find((book) => book.bookId === bookId)!;
-    if (!bookToSave) return;
-
-    // get token
+    // Find the book in the searchedBooks state
+    const bookToSave = searchedBooks.find((book) => book.bookId === bookId);
+  
+    if (!bookToSave) {
+      console.error(`Book with ID ${bookId} not found.`);
+      return;
+    }
+  
     try {
-      const { data } = await saveBook({ variables: { input: bookToSave } });
-      if (!data) throw new Error('Failed to save book!');
+      // Call the saveBook mutation with the bookToSave object
+      const { data } = await saveBook({
+        variables: {
+          input: {
+            bookId: bookToSave.bookId,
+            title: bookToSave.title,
+            authors: bookToSave.authors,
+            description: bookToSave.description,
+            image: bookToSave.image,
+            link: bookToSave.link,
+          },
+        },
+      });
+  
+      if (!data) {
+        throw new Error('Failed to save book!');
+      }
+
       setSavedBookIds([...savedBookIds, bookToSave.bookId]);
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      if (err.networkError) {
+        console.error('Network Error:', err.networkError);
+      }
+      if (err.graphQLErrors) {
+        console.error('GraphQL Errors:', err.graphQLErrors);
+      }
+      console.error('Failed to save the book:', err);
+      setErrorMessage('Failed to save book. Please try again.');
     }
   };
 

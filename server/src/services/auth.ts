@@ -2,8 +2,6 @@ import jwt from 'jsonwebtoken';
 import { Request } from 'express';
 import { JwtPayload } from '../types/types';
 
-import dotenv from 'dotenv';
-dotenv.config();
 
 // Apollo Server context to validate tokens
 export const authenticateToken = ({ req }: { req: Request }): JwtPayload | null => {
@@ -13,7 +11,7 @@ export const authenticateToken = ({ req }: { req: Request }): JwtPayload | null 
   if (!token) return null; // Return null if no token is provided
 
   try {
-    const secret = process.env.JWT_SECRET || 'defaultsecret';
+    const secret = process.env.JWT_SECRET_KEY || 'default-secret-key';
     const decoded = jwt.verify(token, secret) as JwtPayload;
     return decoded; // Return the decoded token payload
   } catch (error) {

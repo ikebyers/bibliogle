@@ -6,7 +6,7 @@ import { GET_ME } from '../utils/queries';
 import { REMOVE_BOOK } from '../utils/mutations';
 import { removeBookId } from '../utils/localStorage';
 // import { Key, ReactElement, JSXElementConstructor, ReactNode, ReactPortal } from 'react';
-import { Book } from '../../../server/src/types/types';
+import type { Book } from '../models/Book';
 
 const SavedBooks = () => {
   // Fetch user data with apollo query

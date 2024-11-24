@@ -11,10 +11,15 @@ import path from 'path';
 import routes from './routes/index.js'
 import connectDB from './config/connection.js';
 import cors from 'cors';
+import dotenv from 'dotenv';
+
 
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const envPath = path.join(__dirname, '../.env')
+dotenv.config({path: envPath});
+
 
 const PORT = process.env.PORT || 3001;
 const app = express();

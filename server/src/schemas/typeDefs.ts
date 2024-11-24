@@ -36,9 +36,9 @@ export const typeDefs = gql`
 
     input BookInput {
         bookId: String!
+        title: String!
         authors: [String]
         description: String
-        title: String!
         image: String
         link: String
     }

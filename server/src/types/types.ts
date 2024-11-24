@@ -11,11 +11,11 @@ export interface JwtPayload {
     username: string;
 }
 
-export type Book = {
-    bookId: string;
-    authors?: string[];
-    description?: string;
-    title: string;
-    image?: string;
-    link?: string;
-};
+// export type Book = {
+//     bookId: string;
+//     authors?: string[];
+//     description?: string;
+//     title: string;
+//     image?: string;
+//     link?: string;
+// };
