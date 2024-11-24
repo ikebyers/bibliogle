@@ -1,6 +1,6 @@
 import { GraphQLContext } from '../types/types'; // Create a custom type for the GraphQL context
-import User from '../models/User';
-import { signToken } from '../services/auth';
+import User from '../models/User.js';
+import { signToken } from '../services/auth.js';
 
 export const resolvers = {
     Query: {
@@ -9,7 +9,7 @@ export const resolvers = {
             if (!user) {
                 throw new Error('You must be logged in!');
             }
-            return await User.findById(user._id).populate('savedBooks');
+            return await User.findById(user.id).populate('savedBooks');
         },
     },
     Mutation: {
@@ -39,7 +39,7 @@ export const resolvers = {
                 throw new Error('You must be logged in!');
             }
             const updatedUser = await User.findByIdAndUpdate(
-                user._id,
+                user.id,
                 { $addToSet: { savedBooks: book } },
                 { new: true }
             );
@@ -51,7 +51,7 @@ export const resolvers = {
                 throw new Error('You must be logged in!');
             }
             const updatedUser = await User.findByIdAndUpdate(
-                user._id,
+                user.id,
                 { $pull: { savedBooks: { bookId } } },
                 { new: true }
             );

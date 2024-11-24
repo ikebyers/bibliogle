@@ -1,12 +1,21 @@
 import { Request } from 'express';
 
-export interface UserPayload {
-    _id: string;
-    username: string;
-    email: string;
-}
-
 export interface GraphQLContext {
     req: Request;
-    user?: UserPayload | null;
+    user: JwtPayload | null;
 }
+
+export interface JwtPayload {
+    id: string;
+    email: string;
+    username: string;
+}
+
+export type Book = {
+    bookId: string;
+    authors?: string[];
+    description?: string;
+    title: string;
+    image?: string;
+    link?: string;
+};

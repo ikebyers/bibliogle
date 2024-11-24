@@ -2,9 +2,10 @@ import { useState } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
 import { Form, Button, Alert } from 'react-bootstrap';
 
-import { createUser } from '../utils/API';
-import Auth from '../utils/auth';
+import { useMutation } from '@apollo/client';
+import { ADD_USER } from '../utils/mutations';
 import type { User } from '../models/User';
+import Auth from '../utils/auth';
 
 // biome-ignore lint/correctness/noEmptyPattern: <explanation>
 const SignupForm = ({}: { handleModalClose: () => void }) => {
@@ -14,6 +15,8 @@ const SignupForm = ({}: { handleModalClose: () => void }) => {
   const [validated] = useState(false);
   // set state for alert
   const [showAlert, setShowAlert] = useState(false);
+
+  const [addUser, { error }] = useMutation(ADD_USER);
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -31,17 +34,23 @@ const SignupForm = ({}: { handleModalClose: () => void }) => {
     }
 
     try {
-      const response = await createUser(userFormData);
+      const { data } = await addUser({
+        variables: { ...userFormData },
+      });
 
-      if (!response.ok) {
-        throw new Error('something went wrong!');
+      if (!data) {
+        throw new Error('Something went wrong with the signup process!');
       }
 
-      const { token } = await response.json();
-      Auth.login(token);
+      Auth.login(data.addUser.token);
     } catch (err) {
       console.error(err);
       setShowAlert(true);
+    }
+
+    if (error) {
+      console.error('GraphQL Error:', error.message);
+      setShowAlert(true); // Optionally trigger the alert from line 42
     }
 
     setUserFormData({

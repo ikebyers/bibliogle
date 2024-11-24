@@ -1,14 +1,30 @@
-import express from 'express';
 import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@apollo/server/express4';
-import { authMiddleware } from './services/auth';
-import { typeDefs } from './schemas/typeDefs';
-import { resolvers } from './schemas/resolvers';
+import { authenticateToken } from './services/auth.js';
+import { typeDefs } from './schemas/typeDefs.js';
+import { resolvers } from './schemas/resolvers.js';
+import { GraphQLContext } from './types/types.js';
+import { fileURLToPath } from 'url';
+
+import express from 'express';
 import path from 'path';
-import connectDB from './config/connection';
+import routes from './routes/index.js'
+import connectDB from './config/connection.js';
+import cors from 'cors';
+
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const PORT = process.env.PORT || 3001;
 const app = express();
+
+app.use(
+  cors({
+    origin: 'http://localhost:3000',
+    credentials: true,
+  })
+);
 
 // Create apollo server
 const server = new ApolloServer({
@@ -28,22 +44,23 @@ const startServer = async () => {
     app.use(express.urlencoded({ extended: true }));
     app.use(express.json()); 
 
-    // Add Apollo GraphQL middleware with context for authentication
+    // add Apollo GraphQL middleware for authentication
     app.use(
       '/graphql',
       expressMiddleware(server, {
-        context: async ({ req }) => {
-          const user = authMiddleware({ req });
-          return { user };
+        context: async ({ req }): Promise<GraphQLContext> => {
+          const user = authenticateToken({ req });
+          return { req, user }; 
         },
       })
     );
 
     // Serve static files from react
     app.use(express.static(path.join(__dirname, '../client/dist')));
+    app.use(routes);
 
     // wild card route to serve react index
-    app.get('*', (req, res) => {
+    app.get('*', (_req, res) => {
       res.sendFile(path.join(__dirname, '../client/dist/index.html'));
     });
 
