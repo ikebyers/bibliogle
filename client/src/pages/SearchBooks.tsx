@@ -15,6 +15,8 @@ import type { GoogleAPIBook } from '../models/GoogleAPIBook';
 import { useMutation } from '@apollo/client';
 import { SAVE_BOOK } from '../utils/mutations';
 import { searchGoogleBooks } from '../utils/API';
+// import { JwtPayload } from '../../../server/src/types/types';
+// import jwt_decode from 'jwt-decode';
 
 const SearchBooks = () => {
   const [searchedBooks, setSearchedBooks] = useState<Book[]>([]);
@@ -38,12 +40,12 @@ const SearchBooks = () => {
       const { items } = await response.json();
 
       const bookData = items.map((book: GoogleAPIBook) => ({
-        bookId: book.id,
-        title: book.volumeInfo.title,
-        authors: book.volumeInfo.authors || ['No author to display'],
-        description: book.volumeInfo.description,
-        image: book.volumeInfo.imageLinks?.thumbnail || '',
-        link: book.volumeInfo.infoLink || '',
+        bookId: book.id || 'No ID available',
+        title: book.volumeInfo.title || 'No title available', // Provide fallback
+        authors: book.volumeInfo.authors || ['No author to display'], // Fallback for authors
+        description: book.volumeInfo.description || 'No description available', // Fallback for description
+        image: book.volumeInfo.imageLinks?.thumbnail || '', // Fallback for image
+        link: book.volumeInfo.infoLink || '', // Fallback for link
       }));
 
       setSearchedBooks(bookData);
@@ -57,23 +59,27 @@ const SearchBooks = () => {
   const handleSaveBook = async (bookId: string) => {
     // Find the book in the searchedBooks state
     const bookToSave = searchedBooks.find((book) => book.bookId === bookId);
+    console.log('bookToSave:', bookToSave);
   
     if (!bookToSave) {
       console.error(`Book with ID ${bookId} not found.`);
       return;
     }
+
+    const userId = Auth.getProfile()?.id;
   
     try {
       // Call the saveBook mutation with the bookToSave object
       const { data } = await saveBook({
         variables: {
+          userId,
           input: {
             bookId: bookToSave.bookId,
             title: bookToSave.title,
             authors: bookToSave.authors,
-            description: bookToSave.description,
-            image: bookToSave.image,
-            link: bookToSave.link,
+            description: bookToSave.description || 'No description available',
+            image: bookToSave.image || '',
+            link: bookToSave.link || '',
           },
         },
       });

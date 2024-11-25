@@ -1,6 +1,7 @@
 import { GraphQLContext } from '../types/types';
 import User from '../models/User.js';
 import { signToken } from '../services/auth.js';
+import mongoose from 'mongoose';
 
 export const resolvers = {
     Query: {
@@ -18,7 +19,7 @@ export const resolvers = {
             if (!user || !(await user.isCorrectPassword(password))) {
                 throw new Error('Invalid credentials');
             }
-            const token = signToken(user.username, user.email, user._id.toString());
+            const token = signToken(user.username, user.email, user.id.toString());
             return { token, user };
         },
         addUser: async (_: unknown, { username, email, password }: { username: string; email: string; password: string }) => {
@@ -27,30 +28,48 @@ export const resolvers = {
             return { token, user };
         },
         saveBook: async (
-            _: unknown,
-            { input }: { input: { bookId: string; title: string; authors: string[]; description?: string; image?: string; link?: string } },
+            _: unknown, 
+            args: any,
+            // { input }: { input: { bookId: string; title: string; authors: string[]; description?: string; image?: string; link?: string } },
             context: GraphQLContext
         ) => {
-            const { user } = context;
-        
-            // Ensure the user is logged in
-            if (!user) {
-                throw new Error('You must be logged in to save a book!');
-            }
-        
-            // Update the user with the new book
+            // console.log('User:', context.user);
+            console.log('something else', args.input.title);
+
+            const userId = new mongoose.Types.ObjectId(context?.user?.id);
+
+            // const { user } = context;
+            // console.log(user?.id);
+            
+            // // Ensure the user is logged in
+            // if (!user) {
+            //     throw new Error('You must be logged in to save a book!');
+            // }
+
+            // Validate required fields
+            // if (!input.bookId || !input.title) {
+            //     throw new Error('Missing required fields: bookId and title are required.');
+            // }
+
+            // Provide defaults for optional fields
+            // const { bookId, title, authors, description = 'No description available', image = '', link = '' } = input;
+
+            // Save the book
             const updatedUser = await User.findByIdAndUpdate(
-                user.id,
-                { $addToSet: { savedBooks: input } }, // Use 'input' instead of 'book'
+                // user.id,
+                // { id: context.user?.id },
+                userId,
+                // { $addToSet: { savedBooks: { bookId, title, authors, description, image, link } } },
+                { $addToSet: { savedBooks: args.input } },
                 { new: true, runValidators: true }
             ).populate('savedBooks');
-        
-            // Check if the update was successful
-            if (!updatedUser) {
-                throw new Error('Could not save the book. Please try again.');
-            }
-        
+
+            // if (!updatedUser) {
+            //     throw new Error('Could not save the book. Please try again.');
+            // }
+
             return updatedUser;
+            
         },
         removeBook: async (_: unknown, { bookId }: { bookId: string }, context: GraphQLContext) => {
             const { user } = context;

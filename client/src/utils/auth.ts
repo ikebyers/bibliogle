@@ -1,5 +1,6 @@
 // use this to decode a token and get the user's information out of it
 import { jwtDecode } from 'jwt-decode';
+import type { JwtPayload } from '../../../server/src/types/types';
 
 interface UserToken {
   name: string;
@@ -8,9 +9,16 @@ interface UserToken {
 
 // create a new class to instantiate for a user
 class AuthService {
-  // get user data
-  getProfile() {
-    return jwtDecode(this.getToken() || '');
+  getProfile(): JwtPayload | null {
+    const token = this.getToken();
+    if (!token) return null;
+
+    try {
+      return jwtDecode<JwtPayload>(token);
+    } catch (err) {
+      console.error('Failed to decode token:', err);
+      return null;
+    }
   }
 
   // check if user's logged in

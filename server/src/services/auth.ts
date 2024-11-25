@@ -20,8 +20,8 @@ export const authenticateToken = ({ req }: { req: Request }): JwtPayload | null 
   }
 };
 
-export const signToken = (username: string, email: string, _id: string) => {
-  const payload = { username, email, _id };
+export const signToken = (username: string, email: string, id: string) => {
+  const payload = { username, email, id };
   const secretKey = process.env.JWT_SECRET_KEY || '';
 
   return jwt.sign(payload, secretKey, { expiresIn: '1h' });

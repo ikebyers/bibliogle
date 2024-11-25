@@ -21,6 +21,7 @@
     "@apollo/server": "^4.11.2",
     "@types/graphql": "^14.2.3",
     "apollo-server-express": "^3.13.0",
-    "graphql": "^16.9.0"
+    "graphql": "^16.9.0",
+    "jwt-decode": "^4.0.0"
   }
 }
