@@ -61,12 +61,12 @@ const startServer = async () => {
     );
 
     // Serve static files from react
-    app.use(express.static(path.join(__dirname, '../client/dist')));
+    app.use(express.static(path.join(__dirname, '../../client/dist')));
     app.use(routes);
 
     // wild card route to serve react index
     app.get('*', (_req, res) => {
-      res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+      res.sendFile(path.join(__dirname, '../../client/dist/index.html'));
     });
 
     // start server
