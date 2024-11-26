@@ -32,9 +32,9 @@
     "removeComments": true,   /* Remove comments in compiled files */
     "declaration": true       
   },
-  "references": [
-    { "path": "./client" },
-    { "path": "./server" }
-  ],
+  // "references": [
+  //   { "path": "./client" },
+  //   { "path": "./server" }
+  // ],
   // "exclude": ["dist", "node_modules"]
 }
